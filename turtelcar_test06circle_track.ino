@@ -5,14 +5,16 @@
 #define MOTOR1_DIR1_PIN  53
 #define MOTOR1_DIR2_PIN  54
 
-#define SET_FORWARD   100
-#define TURN_LEFT      65
-#define TURN_RIGHT    150
-#define TIME_FORWARD 2000
+#define ANGLE_SET_FORWARD  100
+#define ANGLE_TURN_LEFT     65
+#define ANGLE_TURN_RIGHT   150
 
-#define STATE_IDLE 0
-#define STATE_MOVE 1
+#define TIME_FORWARD      2000
+#define TIME_STEER_RIGHT  2000
 
+#define STATE_IDLE        0
+#define STATE_FORWARD     1
+#define STATE_STEER_RIGHT 2
 
 Servo servoSteering;
 
@@ -36,18 +38,26 @@ void setup() {
   delay(2000);
 
 // Forward: pos = SET_FORWARD;
-  pos = SET_FORWARD;
-  servoSteering.write(pos);
-  delay(500);
+  
+  servoSteering.write(ANGLE_SET_FORWARD);
+  delay(50);
   timeNow = millis();
   timeOld = timeNow;
   Serial.println( "FIRST: timeNow = " + String(timeNow));
-  targetState = STATE_MOVE;
+//  targetState = STATE_FORWARD;
+  targetState = STATE_STEER_RIGHT;
 }
 
 void loop() {
   timeNow = millis();
-  if ((stateCar == STATE_MOVE) && (timeNow - timeOld > TIME_FORWARD)) {
+  if ((stateCar == STATE_FORWARD) && (timeNow - timeOld > TIME_FORWARD)) {
+    timeOld = timeNow;
+    Serial.println( "LOOP: timeNow = " + String(timeNow));
+    targetState = STATE_IDLE;
+  }
+
+
+  if ((stateCar == STATE_STEER_RIGHT) && (timeNow - timeOld > TIME_STEER_RIGHT)) {
     timeOld = timeNow;
     Serial.println( "LOOP: timeNow = " + String(timeNow));
     targetState = STATE_IDLE;
@@ -61,8 +71,11 @@ void loop() {
     case STATE_IDLE:
       stopMotor();
       break;
-    case STATE_MOVE:
+    case STATE_FORWARD:
       runForward();
+      break;
+    case STATE_STEER_RIGHT:
+      steerRight();
       break;
   }
 
@@ -75,7 +88,23 @@ void stopMotor() {
 }
 
 void runForward() {
-    stateCar = STATE_MOVE;
+    stateCar = STATE_FORWARD;
+
+    servoSteering.write(ANGLE_SET_FORWARD);
+    delay(50);
+
+    digitalWrite(MOTOR1_START_PIN, HIGH);
+    digitalWrite(MOTOR1_DIR1_PIN, LOW);
+    digitalWrite(MOTOR1_DIR2_PIN, HIGH);
+}
+
+
+void steerRight() {
+    stateCar = STATE_STEER_RIGHT;
+
+    servoSteering.write(ANGLE_TURN_RIGHT);
+    delay(50);
+
     digitalWrite(MOTOR1_START_PIN, HIGH);
     digitalWrite(MOTOR1_DIR1_PIN, LOW);
     digitalWrite(MOTOR1_DIR2_PIN, HIGH);
