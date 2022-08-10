@@ -12,6 +12,8 @@
 #define TIME_FORWARD      2000
 #define TIME_STEER_RIGHT 12500
 
+
+#define COUNT_ACTIVE_STATES  5
 #define STATE_IDLE           0 
 #define STATE_MOVE           1
 #define STATE_STEER_FORWARD  2
@@ -27,8 +29,25 @@ Servo servoSteering;
 int pos = 0;    // variable to store the servo position
 int timeNow = 0;
 int timeOld = 0;
+int numTargetState = 0;
 int stateCar = STATE_IDLE;
 int targetState = stateCar;
+int listStates[COUNT_ACTIVE_STATES] = {
+                                       STATE_IDLE, 
+                                       STATE_MOVE_FORWARD, 
+                                       STATE_STEER_RIGHT, 
+                                       STATE_MOVE_FORWARD,
+                                       STATE_IDLE 
+                                      };
+
+int listTime[COUNT_ACTIVE_STATES] = {
+                                       2000, 
+                                       2000, 
+                                       12500, 
+                                       2000,
+                                       2000 
+                                      };
+
 
 void setup() {
   pinMode(MOTOR1_DIR1_PIN, OUTPUT);
@@ -51,23 +70,23 @@ void setup() {
   timeOld = timeNow;
   Serial.println( "FIRST: timeNow = " + String(timeNow));
 //  targetState = STATE_MOVE_FORWARD;
-  targetState = STATE_STEER_RIGHT;
+  targetState = listStates[numTargetState];
 }
 
 void loop() {
   timeNow = millis();
-  if ((stateCar == STATE_MOVE_FORWARD) && (timeNow - timeOld > TIME_FORWARD)) {
+  if ((stateCar == listStates[numTargetState]) && (timeNow - timeOld > listTime[numTargetState])) {
     timeOld = timeNow;
+    numTargetState++;
+    if (numTargetState > COUNT_ACTIVE_STATES - 1) {
+      numTargetState = COUNT_ACTIVE_STATES - 1;
+    }
     Serial.println( "LOOP: timeNow = " + String(timeNow));
-    targetState = STATE_IDLE;
+    Serial.println( "numTargetState: " + String(numTargetState));
+    Serial.println( "Next Time: " + String(listTime[numTargetState]));
+    targetState = listStates[numTargetState];
   }
 
-
-  if ((stateCar == STATE_STEER_RIGHT) && (timeNow - timeOld > TIME_STEER_RIGHT)) {
-    timeOld = timeNow;
-    Serial.println( "LOOP: timeNow = " + String(timeNow));
-    targetState = STATE_MOVE_FORWARD;
-  }
 
   if (stateCar == targetState) {
     return;
