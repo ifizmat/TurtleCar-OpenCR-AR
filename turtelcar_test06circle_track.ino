@@ -14,6 +14,8 @@
 
 
 #define COUNT_ACTIVE_STATES  5
+
+/*
 #define STATE_IDLE           0 
 #define STATE_MOVE           1
 #define STATE_STEER_FORWARD  2
@@ -23,6 +25,19 @@
 #define STATE_MOVE_RIGHT     6
 #define STATE_MOVE_LEFT      7
 #define STATE_MOVE_BACK      8
+*/
+
+enum {
+  STATE_IDLE,
+  STATE_MOVE,
+  STATE_STEER_FORWARD,
+  STATE_STEER_RIGHT,
+  STATE_STEER_LEFT,
+  STATE_MOVE_FORWARD,
+  STATE_MOVE_RIGHT,
+  STATE_MOVE_LEFT,
+  STATE_MOVE_BACK,
+} stateCar;
 
 Servo servoSteering;
 
@@ -30,7 +45,7 @@ int pos = 0;    // variable to store the servo position
 int timeNow = 0;
 int timeOld = 0;
 int numTargetState = 0;
-int stateCar = STATE_IDLE;
+// int stateCar = STATE_IDLE;
 int targetState = stateCar;
 int listStates[COUNT_ACTIVE_STATES] = {
                                        STATE_IDLE, 
@@ -49,7 +64,26 @@ int listTime[COUNT_ACTIVE_STATES] = {
                                       };
 
 
+enum namesStates {
+         state1, 
+         state2
+       };
+
+struct structState1 {
+  namesStates nameState;
+  int timeState;
+};
+
+struct structState1 stateCar1[2] = { 
+                                    state1, 1000,
+                                    state2, 2000,
+                                   },
+             targetState1;
+
 void setup() {
+  targetState1.nameState = state2;
+  targetState1.timeState = 3000;
+  targetState1 = {state1, 3000};
   pinMode(MOTOR1_DIR1_PIN, OUTPUT);
   pinMode(MOTOR1_DIR2_PIN, OUTPUT);
   pinMode(MOTOR1_START_PIN, OUTPUT);
