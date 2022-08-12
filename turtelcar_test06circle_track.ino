@@ -27,7 +27,7 @@
 #define STATE_MOVE_BACK      8
 */
 
-enum {
+enum possibleStatesCar {
   STATE_IDLE,
   STATE_MOVE,
   STATE_STEER_FORWARD,
@@ -37,7 +37,20 @@ enum {
   STATE_MOVE_RIGHT,
   STATE_MOVE_LEFT,
   STATE_MOVE_BACK,
-} stateCar;
+} targetState, stateCar;
+
+struct stateChart {
+  possibleStatesCar aStateCar;
+  int               timeState;
+};
+
+stateChart transitionsStates[COUNT_ACTIVE_STATES] = {
+           STATE_IDLE,         2000, 
+           STATE_MOVE_FORWARD, 2000, 
+           STATE_STEER_RIGHT,  12500,
+           STATE_MOVE_FORWARD, 2000, 
+           STATE_IDLE,         2000  
+                                             };
 
 Servo servoSteering;
 
@@ -46,7 +59,7 @@ int timeNow = 0;
 int timeOld = 0;
 int numTargetState = 0;
 // int stateCar = STATE_IDLE;
-int targetState = stateCar;
+//int targetState = stateCar;
 int listStates[COUNT_ACTIVE_STATES] = {
                                        STATE_IDLE, 
                                        STATE_MOVE_FORWARD, 
@@ -63,27 +76,29 @@ int listTime[COUNT_ACTIVE_STATES] = {
                                        2000 
                                       };
 
-
+/*
 enum namesStates {
          state1, 
          state2
        };
+*/
 
 struct structState1 {
-  namesStates nameState;
+//  namesStates nameState;
+  enum { state1, state2 } nameState;
   int timeState;
 };
 
 struct structState1 stateCar1[2] = { 
-                                    state1, 1000,
-                                    state2, 2000,
+                                    structState1::state1, 1000,
+                                    structState1::state2, 2000,
                                    },
              targetState1;
 
 void setup() {
-  targetState1.nameState = state2;
+  targetState1.nameState = structState1::state2;
   targetState1.timeState = 3000;
-  targetState1 = {state1, 3000};
+  targetState1 = {structState1::state1, 3000};
   pinMode(MOTOR1_DIR1_PIN, OUTPUT);
   pinMode(MOTOR1_DIR2_PIN, OUTPUT);
   pinMode(MOTOR1_START_PIN, OUTPUT);
@@ -104,12 +119,13 @@ void setup() {
   timeOld = timeNow;
   Serial.println( "FIRST: timeNow = " + String(timeNow));
 //  targetState = STATE_MOVE_FORWARD;
-  targetState = listStates[numTargetState];
+  targetState = transitionsStates[numTargetState].aStateCar;
 }
 
 void loop() {
   timeNow = millis();
-  if ((stateCar == listStates[numTargetState]) && (timeNow - timeOld > listTime[numTargetState])) {
+  if ((stateCar == transitionsStates[numTargetState].aStateCar) && 
+      (timeNow - timeOld > transitionsStates[numTargetState].timeState)) {
     timeOld = timeNow;
     numTargetState++;
     if (numTargetState > COUNT_ACTIVE_STATES - 1) {
@@ -117,8 +133,8 @@ void loop() {
     }
     Serial.println( "LOOP: timeNow = " + String(timeNow));
     Serial.println( "numTargetState: " + String(numTargetState));
-    Serial.println( "Next Time: " + String(listTime[numTargetState]));
-    targetState = listStates[numTargetState];
+    Serial.println( "Next Time: " + String(transitionsStates[numTargetState].timeState));
+    targetState = transitionsStates[numTargetState].aStateCar;
   }
 
 
@@ -160,7 +176,6 @@ void runForward() {
 
 void steerRight() {
     stateCar = STATE_STEER_RIGHT;
-
     servoSteering.write(ANGLE_TURN_RIGHT);
     delay(50);
 
