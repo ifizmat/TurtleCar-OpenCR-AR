@@ -15,17 +15,7 @@
 
 #define COUNT_ACTIVE_STATES  5
 
-/*
-#define STATE_IDLE           0 
-#define STATE_MOVE           1
-#define STATE_STEER_FORWARD  2
-#define STATE_STEER_RIGHT    3
-#define STATE_STEER_LEFT     4
-#define STATE_MOVE_FORWARD   5
-#define STATE_MOVE_RIGHT     6
-#define STATE_MOVE_LEFT      7
-#define STATE_MOVE_BACK      8
-*/
+// 13.08.2022 removed legacy code: define STATE_, listStates[], listTmes[]
 
 enum possibleStatesCar {
   STATE_IDLE,
@@ -54,51 +44,11 @@ stateChart transitionsStates[COUNT_ACTIVE_STATES] = {
 
 Servo servoSteering;
 
-int pos = 0;    // variable to store the servo position
 int timeNow = 0;
 int timeOld = 0;
 int numTargetState = 0;
-// int stateCar = STATE_IDLE;
-//int targetState = stateCar;
-int listStates[COUNT_ACTIVE_STATES] = {
-                                       STATE_IDLE, 
-                                       STATE_MOVE_FORWARD, 
-                                       STATE_STEER_RIGHT, 
-                                       STATE_MOVE_FORWARD,
-                                       STATE_IDLE 
-                                      };
-
-int listTime[COUNT_ACTIVE_STATES] = {
-                                       2000, 
-                                       2000, 
-                                       12500, 
-                                       2000,
-                                       2000 
-                                      };
-
-/*
-enum namesStates {
-         state1, 
-         state2
-       };
-*/
-
-struct structState1 {
-//  namesStates nameState;
-  enum { state1, state2 } nameState;
-  int timeState;
-};
-
-struct structState1 stateCar1[2] = { 
-                                    structState1::state1, 1000,
-                                    structState1::state2, 2000,
-                                   },
-             targetState1;
 
 void setup() {
-  targetState1.nameState = structState1::state2;
-  targetState1.timeState = 3000;
-  targetState1 = {structState1::state1, 3000};
   pinMode(MOTOR1_DIR1_PIN, OUTPUT);
   pinMode(MOTOR1_DIR2_PIN, OUTPUT);
   pinMode(MOTOR1_START_PIN, OUTPUT);
@@ -111,8 +61,6 @@ void setup() {
   stopMotor();
   delay(2000);
 
-// Forward: pos = SET_FORWARD;
-  
   servoSteering.write(ANGLE_SET_FORWARD);
   delay(50);
   timeNow = millis();
@@ -131,12 +79,12 @@ void loop() {
     if (numTargetState > COUNT_ACTIVE_STATES - 1) {
       numTargetState = COUNT_ACTIVE_STATES - 1;
     }
+    targetState = transitionsStates[numTargetState].aStateCar;
+
     Serial.println( "LOOP: timeNow = " + String(timeNow));
     Serial.println( "numTargetState: " + String(numTargetState));
     Serial.println( "Next Time: " + String(transitionsStates[numTargetState].timeState));
-    targetState = transitionsStates[numTargetState].aStateCar;
   }
-
 
   if (stateCar == targetState) {
     return;
@@ -172,7 +120,6 @@ void runForward() {
     digitalWrite(MOTOR1_DIR1_PIN, LOW);
     digitalWrite(MOTOR1_DIR2_PIN, HIGH);
 }
-
 
 void steerRight() {
     stateCar = STATE_STEER_RIGHT;
