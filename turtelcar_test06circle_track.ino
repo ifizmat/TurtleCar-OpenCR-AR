@@ -1,3 +1,6 @@
+// TODO: Demo forward, left, right, back, left back, right back, 
+//       steering left-forward-right
+
 #include <Servo.h>
 
 #define STEERING_PIN         9
@@ -5,11 +8,9 @@
 #define MOTOR1_DIR1_PIN     53
 #define MOTOR1_DIR2_PIN     54
 
-#define ANGLE_SET_FORWARD  110
-#define ANGLE_TURN_LEFT     65
+#define ANGLE_SET_FORWARD  112
+#define ANGLE_TURN_LEFT     80
 #define ANGLE_TURN_RIGHT   150
-
-// 13.08.2022 removed legacy code: define STATE_, listStates[], listTmes[]
 
 enum possibleStatesCar {
   STATE_IDLE,
@@ -32,19 +33,19 @@ struct stateChart {
 
 stateChart transitionsStates[COUNT_ACTIVE_STATES] = {
 // 1
-           STATE_STEER_LEFT,    2000,
+           STATE_STEER_RIGHT,   1500,
 // 2
-           STATE_STEER_RIGHT,   2000,
+           STATE_STEER_LEFT,    1500,
 // 3
            STATE_STEER_FORWARD, 2000, 
 // 4
-           STATE_MOVE_FORWARD, 20000, 
+           STATE_MOVE_FORWARD, 11000, 
 // 5
-           STATE_MOVE_LEFT,     6000,
+           STATE_MOVE_LEFT,    12000,
 // 6
-           STATE_MOVE_FORWARD, 20000, 
+           STATE_MOVE_FORWARD, 11000, 
 // 7
-           STATE_MOVE_LEFT,     6000,
+           STATE_MOVE_LEFT,    12000,
 // 8
            STATE_STEER_FORWARD,    0,
 // 9
