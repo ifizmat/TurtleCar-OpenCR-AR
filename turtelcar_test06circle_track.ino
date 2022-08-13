@@ -9,12 +9,6 @@
 #define ANGLE_TURN_LEFT     65
 #define ANGLE_TURN_RIGHT   150
 
-#define TIME_FORWARD      2000
-#define TIME_STEER_RIGHT 12500
-
-
-#define COUNT_ACTIVE_STATES  5
-
 // 13.08.2022 removed legacy code: define STATE_, listStates[], listTmes[]
 
 enum possibleStatesCar {
@@ -34,13 +28,24 @@ struct stateChart {
   int               timeState;
 };
 
+#define COUNT_ACTIVE_STATES  8
+
 stateChart transitionsStates[COUNT_ACTIVE_STATES] = {
-           STATE_IDLE,         2000, 
-           STATE_MOVE_FORWARD, 2000, 
-           STATE_STEER_RIGHT,  12500,
-           STATE_MOVE_FORWARD, 2000, 
-           STATE_IDLE,         2000  
-                                             };
+/*
+           STATE_IDLE,          2000, 
+           STATE_MOVE_FORWARD,  5000, 
+           STATE_STEER_RIGHT,  12800,
+           STATE_MOVE_FORWARD,  5000, 
+           STATE_STEER_RIGHT,  12800,
+*/
+           STATE_STEER_FORWARD, 1000,
+           STATE_STEER_RIGHT,   2000,
+           STATE_STEER_FORWARD, 1000,
+           STATE_STEER_RIGHT,   2000,
+           STATE_STEER_FORWARD, 1000,
+           STATE_STEER_RIGHT,   2000,
+           STATE_STEER_FORWARD, 1000,
+           STATE_IDLE,          2000                };
 
 Servo servoSteering;
 
@@ -100,6 +105,9 @@ void loop() {
     case STATE_STEER_RIGHT:
       steerRight();
       break;
+    case STATE_STEER_FORWARD:
+      steerForward();
+      break;
   }
 
   delay(50);
@@ -119,6 +127,12 @@ void runForward() {
     digitalWrite(MOTOR1_START_PIN, HIGH);
     digitalWrite(MOTOR1_DIR1_PIN, LOW);
     digitalWrite(MOTOR1_DIR2_PIN, HIGH);
+}
+
+void steerForward() {
+    stateCar = STATE_STEER_FORWARD;
+    servoSteering.write(ANGLE_SET_FORWARD);
+    delay(50);
 }
 
 void steerRight() {
