@@ -5,7 +5,7 @@
 #define MOTOR1_DIR1_PIN     53
 #define MOTOR1_DIR2_PIN     54
 
-#define ANGLE_SET_FORWARD  100
+#define ANGLE_SET_FORWARD  110
 #define ANGLE_TURN_LEFT     65
 #define ANGLE_TURN_RIGHT   150
 
@@ -28,23 +28,26 @@ struct stateChart {
   int               timeState;
 };
 
-#define COUNT_ACTIVE_STATES  8
+#define COUNT_ACTIVE_STATES  9
 
 stateChart transitionsStates[COUNT_ACTIVE_STATES] = {
-/*
-           STATE_IDLE,          2000, 
-           STATE_MOVE_FORWARD,  5000, 
-           STATE_STEER_RIGHT,  12800,
-           STATE_MOVE_FORWARD,  5000, 
-           STATE_STEER_RIGHT,  12800,
-*/
-           STATE_STEER_FORWARD, 1000,
+// 1
+           STATE_STEER_LEFT,    2000,
+// 2
            STATE_STEER_RIGHT,   2000,
-           STATE_STEER_FORWARD, 1000,
-           STATE_STEER_RIGHT,   2000,
-           STATE_STEER_FORWARD, 1000,
-           STATE_STEER_RIGHT,   2000,
-           STATE_STEER_FORWARD, 1000,
+// 3
+           STATE_STEER_FORWARD, 2000, 
+// 4
+           STATE_MOVE_FORWARD, 20000, 
+// 5
+           STATE_MOVE_LEFT,     6000,
+// 6
+           STATE_MOVE_FORWARD, 20000, 
+// 7
+           STATE_MOVE_LEFT,     6000,
+// 8
+           STATE_STEER_FORWARD,    0,
+// 9
            STATE_IDLE,          2000                };
 
 Servo servoSteering;
@@ -99,14 +102,23 @@ void loop() {
     case STATE_IDLE:
       stopMotor();
       break;
-    case STATE_MOVE_FORWARD:
-      runForward();
+    case STATE_STEER_FORWARD:
+      steerForward();
       break;
     case STATE_STEER_RIGHT:
       steerRight();
       break;
-    case STATE_STEER_FORWARD:
-      steerForward();
+    case STATE_STEER_LEFT:
+      steerLeft();
+      break;
+    case STATE_MOVE_FORWARD:
+      runForward();
+      break;
+    case STATE_MOVE_RIGHT:
+      moveRight();
+      break;
+    case STATE_MOVE_LEFT:
+      moveLeft();
       break;
   }
 
@@ -118,17 +130,6 @@ void stopMotor() {
     digitalWrite(MOTOR1_START_PIN, LOW);  
 }
 
-void runForward() {
-    stateCar = STATE_MOVE_FORWARD;
-
-    servoSteering.write(ANGLE_SET_FORWARD);
-    delay(50);
-
-    digitalWrite(MOTOR1_START_PIN, HIGH);
-    digitalWrite(MOTOR1_DIR1_PIN, LOW);
-    digitalWrite(MOTOR1_DIR2_PIN, HIGH);
-}
-
 void steerForward() {
     stateCar = STATE_STEER_FORWARD;
     servoSteering.write(ANGLE_SET_FORWARD);
@@ -138,6 +139,38 @@ void steerForward() {
 void steerRight() {
     stateCar = STATE_STEER_RIGHT;
     servoSteering.write(ANGLE_TURN_RIGHT);
+    delay(50);
+}
+
+void steerLeft() {
+    stateCar = STATE_STEER_LEFT;
+    servoSteering.write(ANGLE_TURN_LEFT);
+    delay(50);
+}
+
+void runForward() {
+    stateCar = STATE_MOVE_FORWARD;
+    servoSteering.write(ANGLE_SET_FORWARD);
+    delay(50);
+
+    digitalWrite(MOTOR1_START_PIN, HIGH);
+    digitalWrite(MOTOR1_DIR1_PIN, LOW);
+    digitalWrite(MOTOR1_DIR2_PIN, HIGH);
+}
+
+void moveRight() {
+    stateCar = STATE_MOVE_RIGHT;
+    servoSteering.write(ANGLE_TURN_RIGHT);
+    delay(50);
+
+    digitalWrite(MOTOR1_START_PIN, HIGH);
+    digitalWrite(MOTOR1_DIR1_PIN, LOW);
+    digitalWrite(MOTOR1_DIR2_PIN, HIGH);
+}
+
+void moveLeft() {
+    stateCar = STATE_MOVE_LEFT;
+    servoSteering.write(ANGLE_TURN_LEFT);
     delay(50);
 
     digitalWrite(MOTOR1_START_PIN, HIGH);
